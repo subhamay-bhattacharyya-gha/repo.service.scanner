@@ -19,4 +19,4 @@ RUN chmod +x /app/repo_file_changes.py
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Set the default command to run the Python script
-CMD ["python", "repo_file_changes.py"]
+CMD ["python", "/app/repo_file_changes.py"]
