@@ -1,95 +1,58 @@
-""" Python script to get the list of added, modified, and deleted files in 
-the current branch compared to the main branch. """
-
-# import subprocess
-# import json
+import glob
 import os
+from typing import Dict
 
 
-# def get_git_diff():
-#     """
-#     Get the list of added, modified, and deleted files in the current
-#     branch compared to the main branch.
-#     """
-#     try:
-#         # Fetch the latest changes from the remote
-#         subprocess.run(["git", "fetch", "origin"], check=True)
-
-#         # Get the current branch name
-#         current_branch = (
-#             subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
-#             .strip()
-#             .decode("utf-8")
-#         )
-#         print(f"🔄 Current branch: {current_branch}")
-
-#         # Get the list of changed files
-#         result = subprocess.run(
-#             ["git", "diff", "--name-status", "origin/main...HEAD"],
-#             capture_output=True,
-#             text=True,
-#             check=True,
-#         )
-
-#         added_files = []
-#         modified_files = []
-#         deleted_files = []
-
-#         # Parse the output of `git diff --name-status`
-#         for line in result.stdout.splitlines():
-#             status, file_path = line.split("\t", 1)
-#             if status == "A":
-#                 added_files.append(file_path)
-#             elif status == "M":
-#                 modified_files.append(file_path)
-#             elif status == "D":
-#                 deleted_files.append(file_path)
-
-#         return added_files, modified_files, deleted_files
-
-#     except subprocess.CalledProcessError as e:
-#         print(f"❌ Error running git command: {e}")
-#         return [], [], []
+github_output = []
+service_map = {
+    "cf-template": "aws-cloudformation",
+    "lambda-code": "aws-lambda",
+    "state-machine": "aws-stepfunctions",
+    "glue-code": "aws-glue",
+    "ecs-code": "aws-ecs",
+}
 
 
-def main():
-    """
-    Main function to display the file changes.
-    """
-    github_repo = os.environ.get("INPUT_GITHUB-REPO")
-    print(
-        f"🚀 Checking file changes in the current branch of the repository {github_repo}...\n"
-    )
-    print("--------------------------------------------------------------------------")
-    print("Hello World")
-    print("--------------------------------------------------------------------------")
+def load_text_to_dict(file_path) -> Dict:
+    """Reads a text file and loads it into a dictionary."""
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            for line in f:
+                entry = f"{service_map.get(line.strinp().split('/')[0])}=True"
+                if (
+                    not line.startswith(".")
+                    and entry not in github_output
+                    and line.split("/")[0] in service_map
+                ):
+                    github_output.append(entry)
 
-    # added, modified, deleted = get_git_diff()
+        return github_output
+    except FileNotFoundError:
+        print(f"Error: The file '{file_path}' was not found.")
+    except RuntimeError as e:
+        print(f"An error occurred: {e}")
 
-    # print("\n📄 **Added Files:**")
-    # print("\n".join(added) if added else "No files added.")
 
-    # print("\n📝 **Modified Files:**")
-    # print("\n".join(modified) if modified else "No files modified.")
+def inspect_files(pattern):
+    """Reads multiple text files matching a pattern and loads them into a dictionary."""
+    try:
+        combined_dict = {}
+        for file_path in glob.glob(pattern):
+            print(f"Processing file: {file_path}")
+            combined_dict = load_text_to_dict(file_path)
 
-    # print("\n🗑️ **Deleted Files:**")
-    # print("\n".join(deleted) if deleted else "No files deleted.")
-
-    # # Optional: Export to JSON
-    # changes = {"added": added, "modified": modified, "deleted": deleted}
-
-    # with open("file_changes.json", "w", encoding="utf-8") as json_file:
-    #     json.dump(changes, json_file, indent=4)
-
-    # print("\n✅ File change details saved to `file_changes.json`.")
-
-    # with open(os.getenv("GITHUB_OUTPUT", "/dev/null"), "a", encoding="utf-8") as file:
-    #     file.write("aws-cloudformation=True\n")
-    #     file.write("aws-lambda=True\n")
-    #     file.write("aws-glue=True\n")
-    #     file.write("aws-stepfunctions=False\n")
-    #     file.write("aws-ecs=False\n")
+        return combined_dict
+    except RuntimeError as e:
+        print(f"An error occurred: {e}")
 
 
 if __name__ == "__main__":
-    main()
+    FILE_PATTERN = "*-files.txt"
+    github_output = inspect_files(pattern=FILE_PATTERN)
+
+    print(github_output)
+
+    output_file_path = os.getenv("GITHUB_OUTPUT", "/dev/null")
+    with open(output_file_path, "a", encoding="utf-8") as output_file:
+        for output in github_output:
+            output_file.write(f"{output}\n")
