@@ -2,18 +2,15 @@
 FROM python:3.11-slim
 
 # Install system packages including Git
-RUN apt-get update && \
-    apt-get install -y git && \
-    rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && \
+#     apt-get install -y git && \
+#     rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
 # Copy project files into the container
-COPY repo_file_changes.py /app/
-COPY requirements.txt /app/
-
-RUN chmod +x /app/repo_file_changes.py
+COPY *files.txt /app/
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
