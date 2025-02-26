@@ -26,9 +26,11 @@ def load_text_to_dict(file_path) -> Dict:
                 ):
                     github_output.append(entry)
 
-        for key in service_map:
-            if {key: "true"} not in github_output:
-                github_output.append({key: "false"})
+            for service in service_map.values():
+                print(f"Checking for {service}")
+                if service not in [x.split("=")[0] for x in github_output]:
+                    entry = f"{service}='false'"
+                    github_output.append(entry)
 
         return github_output
     except FileNotFoundError:
