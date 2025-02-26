@@ -11,7 +11,7 @@ outputs:
     description: 'AWS Lambda created / modified or deleted.'
   aws-glue:
     description: 'AWS Glue script created / modified or deleted.'
-  aws-stepfunctions: 
+  aws-stepfunction: 
     description: 'AWS Step Functions created / modified or deleted.'
   aws-ecs: 
     description: 'AWS ECS created / modified or deleted.'

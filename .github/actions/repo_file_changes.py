@@ -7,7 +7,7 @@ github_output = []
 service_map = {
     "cf-template": "aws-cloudformation",
     "lambda-code": "aws-lambda",
-    "state-machine": "aws-stepfunctions",
+    "state-machine": "aws-stepfunction",
     "glue-code": "aws-glue",
     "ecs-code": "aws-ecs",
 }
@@ -18,13 +18,17 @@ def load_text_to_dict(file_path) -> Dict:
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             for line in f:
-                entry = f"{service_map.get(line.strinp().split('/')[0])}=True"
+                entry = f"{service_map.get(line.strip().split('/')[0])}='true'"
                 if (
                     not line.startswith(".")
                     and entry not in github_output
                     and line.split("/")[0] in service_map
                 ):
                     github_output.append(entry)
+
+        for key in service_map:
+            if {key: "true"} not in github_output:
+                github_output.append({key: "false"})
 
         return github_output
     except FileNotFoundError:
