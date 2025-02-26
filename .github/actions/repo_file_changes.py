@@ -2,7 +2,6 @@ import glob
 import os
 from typing import Dict
 
-
 github_output = []
 service_map = {
     "cf-template": "aws-cloudformation",
