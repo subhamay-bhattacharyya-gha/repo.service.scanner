@@ -1,0 +1,20 @@
+name: 'Repository Scanner'
+description: 'Scans the repository for the AWS Services used.'
+inputs:
+  github-repo:
+    description: 'GitHub repository name.'
+    required: true
+outputs:
+  aws-cloudformation:
+    description: 'AWS CloudFormation created / modified or deleted.'
+  aws-lambda: 
+    description: 'AWS Lambda created / modified or deleted.'
+  aws-glue:
+    description: 'AWS Glue script created / modified or deleted.'
+  aws-stepfunctions: 
+    description: 'AWS Step Functions created / modified or deleted.'
+  aws-ecs: 
+    description: 'AWS ECS created / modified or deleted.'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
